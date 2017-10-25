@@ -33,12 +33,12 @@ router.get('/search', (req, res) => {
         FROM
             tag
     `).then(results => {
-        results.forEach(function(result) {
+        results.forEach(result => {
             tags[result.id] = result.name;
         });
         return queryPromise(`
             SELECT
-                id, name, description_company, description_person
+                id, name, description_company, description_person, logo
             FROM
                 org
             WHERE
@@ -47,9 +47,10 @@ router.get('/search', (req, res) => {
                     approved = 1
         `);
     }).then(results => {
-        results.forEach(function(result) {
+        results.forEach(result => {
             orgs[result.id] = {
                 name: result.name,
+                logo: result.logo,
                 description_company: result.description_company,
                 description_person: result.description_person,
                 tags: [],
@@ -71,13 +72,13 @@ router.get('/search', (req, res) => {
                     active = 1
         `);
     }).then(results => {
-        results.forEach(function(result) {
+        results.forEach(result => {
             orgs[result.org_id].tags.push(result.tag_id);
         });
         return queryPromise(`
             SELECT
                 org_id, phone, email, web, latitude, longitude, post_code, city, house_number,
-                extension, contact.id AS contact_id
+                contact.id AS contact_id
             FROM
                     contact
                 INNER JOIN
@@ -90,7 +91,7 @@ router.get('/search', (req, res) => {
                     active = 1
         `);
     }).then(results => {
-        results.forEach(function(result) {
+        results.forEach(result => {
             orgs[result.org_id].contacts.push({
                 id: result.contact_id,
                 phone: result.phone,
@@ -100,8 +101,7 @@ router.get('/search', (req, res) => {
                 longitude: result.longitude,
                 post_code: result.post_code,
                 city: result.city,
-                house_number: result.house_number,
-                extension: result.extension
+                house_number: result.house_number
             });
         });
         res.json({tags, orgs});
