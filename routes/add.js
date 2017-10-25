@@ -1,8 +1,10 @@
 const fs = require('fs');
 const mysql = require('mysql');
 const express = require('express');
+const bodyParser = require('body-parser');
 
 const router = express.Router();
+router.use(bodyParser.json());
 const config = JSON.parse(fs.readFileSync('config-secret.json'))
 const connection = mysql.createConnection({
     host: config.host,
@@ -25,7 +27,7 @@ const queryPromise = (queryBody, values) => {
     });
 }
 router.post('/add', (req, res) => {
-    const data = JSON.parse(req.query.data);
+    const data = req.body;
     let insertedOrgId;
     queryPromise(`
         INSERT INTO
